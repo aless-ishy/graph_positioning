@@ -14,7 +14,7 @@ class Path:
         self.best_distance = self.past_distance + math.sqrt(
             (position["i"] - target["i"]) ** 2 + (position["j"] - target["j"]) ** 2)
 
-    def add_with_copy(self, position):
+    def copy_add(self, position):
         path_list = self.path_list.copy()
         return Path(position, self.target, self.past_distance, path_list)
 

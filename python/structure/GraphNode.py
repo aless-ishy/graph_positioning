@@ -1,8 +1,8 @@
 class GraphNode:
-    def __init__(self, node_name: str, layer_list: [], output_into: [] = None):
+    def __init__(self, node_name: str, data, output_into: [] = None):
         self.children = set(output_into) if output_into is not None else set([])
         self.parents = set([])
-        self.layer_list = layer_list
+        self.data = data
         self.name = node_name
         self.position = None
 
@@ -13,5 +13,5 @@ class GraphNode:
         yield "name", self.name
         yield "children", list(self.children)
         yield "parents", list(self.parents)
-        yield "layer_list", self.layer_list
+        yield "data", self.data
         yield "position", self.position

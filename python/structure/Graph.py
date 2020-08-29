@@ -17,8 +17,8 @@ class Graph:
         self.nodes = {}
         self.map = None
 
-    def add_dict_node(self, name: str, layer_list: [], children: []):
-        node = GraphNode(name, layer_list, children)
+    def add_dict_node(self, name: str, data, children: []):
+        node = GraphNode(name, data, children)
         self.add_node(node)
 
     def add_node(self, node: GraphNode):
@@ -37,9 +37,9 @@ class Graph:
                 largest_layer_size = len(layer)
         if largest_layer_size % 2 == 0:
             largest_layer_size = largest_layer_size + 1
-        width = largest_layer_size * 2 - 1
+        width = largest_layer_size * 2 + 1
         median = int(width * 0.5)
-        matrix = []
+        matrix = [[0] * width]
         for layer_index in range(len(layers)):
             layer = layers[layer_index]
             row = [0] * width
@@ -49,16 +49,17 @@ class Graph:
             i = median - (layer_size - 1)
             for node_name in layer:
                 row[i] = node_name
-                self.nodes[node_name].set_position(layer_index * 2, i)
+                self.nodes[node_name].set_position(layer_index * 2 + 1, i)
                 i = i + 2
                 if i == median and len(layer) % 2 == 0:
                     i = i + 2
             matrix.append(row)
-            if layer_index < len(layers) - 1:
-                matrix.append([0] * width)
+            matrix.append([0] * width)
         return matrix
 
     def get_movements(self, i, j, exception=None):
+        if self.map is None:
+            self.compile()
         if exception is None:
             exception = {"i": -1, "j": -1}
         movements = []
@@ -75,30 +76,29 @@ class Graph:
                                           "distance": non_diagonal if i1 == 0 or j1 == 0 else diagonal})
         return movements
 
-    def find_path(self, position: dict, target: dict):
-        print("Position ", position)
-        print("Target ", target)
+    def find_path(self, position: dict, target: dict, return_trace: bool = False):
+        if self.map is None:
+            self.compile()
+        position["distance"] = 0
         paths = SortedPaths(Path(position, target))
         trace = []
         for row in self.map:
             trace.append([False] * len(row))
         trace[position["i"]][position["j"]] = True
+        trace_movement = []
         while len(paths.list) > 0:
-            matrix = trace
-            s = [[str(int(e)) for e in row] for row in matrix]
-            lens = [max(map(len, col)) for col in zip(*s)]
-            fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
-            table = [fmt.format(*row) for row in s]
-            print('\n'.join(table))
-            print("\n")
+            if return_trace:
+                trace_movement.append(trace)
             path = paths.pop(0)
             if path.path_list[-1]["i"] == target["i"] and path.path_list[-1]["j"] == target["j"]:
-                return path
+                if return_trace:
+                    return path.path_list, trace_movement
+                return path.path_list
             position = path.path_list[-1]
             movements = self.get_movements(position["i"], position["j"], target)
             for movement in movements:
                 if movement not in path:
-                    new_path = path.add_with_copy(movement)
+                    new_path = path.copy_add(movement)
                     paths_number = len(paths.list)
                     if paths_number == 0 and not trace[movement["i"]][movement["j"]]:
                         paths.add(new_path)
@@ -116,23 +116,19 @@ class Graph:
                                     paths.add(new_path)
                                 break
 
-    def create_map(self):
-        self.map = self.create_matrix()
+    def get_edges_paths(self):
+        if self.map is None:
+            self.compile()
         paths = []
         for node_name in self.nodes:
             node = self.nodes[node_name]
             for target_name in node.children:
                 target = self.nodes[target_name]
                 node_position = node.position.copy()
-                node_position["distance"] = 0
                 paths.append({"origin": node_name,
                               "target": target_name,
                               "path": self.find_path(node_position, target.position)})
-        for path in paths:
-            if len(path["path"].path_list) > 2:
-                for movement in path["path"].path_list[1:-1]:
-                    self.map[movement["i"]][movement["j"]] = path["origin"] + "E"
-        return self.map
+        return paths
 
     def find_layer_orientation(self):
         self.set_parents()
@@ -155,11 +151,18 @@ class Graph:
             return None
         return layers
 
-    def __iter__(self):
-        yield "layers_orientation", self.find_layer_orientation()
+    def compile(self):
+        self.map = self.create_matrix()
 
+    def __iter__(self):
+        if self.map is None:
+            self.compile()
         nodes_dict = {}
         for node_name in self.nodes:
-            nodes_dict[node_name] = dict(self.nodes[node_name])
-
+            node_dict = dict(self.nodes[node_name])
+            node_dict.pop("name", None)
+            nodes_dict[node_name] = node_dict
         yield "nodes", nodes_dict
+        yield "edges", self.get_edges_paths()
+        yield "height", len(self.map[0])
+        yield "width", len(self.map)
