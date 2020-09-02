@@ -31,7 +31,7 @@ You can run the server with docker or use flask development server.
 ~/Graph Positioning/python$ docker container run -p 5000:5000 graphpositioning:1.0
 ```
 You can access the app in http://localhost:5000/
-##### 2 Flask Development Server
+#### 2 Flask Development Server
 You will need to uncomment the first lines of **_server.py_** in **_~/python/examples/react_flask/_** .
 * Before
 ```python
