@@ -10,5 +10,4 @@ Builds a small graph and find a edge path with _origin (1,0)_ and _target (3,4)_
 ### react_flask
 React app using flask to handle communication between user interface and python program.
 
-![example screenshot]
-(https://raw.githubusercontent.com/aless-ishy/graph_positioning/master/screenshots/react_flask.png)
+![example screenshot](screenshots/react_flask.png)
