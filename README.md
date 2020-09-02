@@ -9,14 +9,14 @@ The main project, _"structure"_ folder, has no requirement besides python 3.
 Builds a small graph and find a edge path with _origin (1,0)_ and _target (3,4)_.
 #### Run
 ```
-~/Graph Positioning/python$ python  examples/simple_example.py
+~/Graph Positioning/python$ python examples/simple_example.py
 ```
 ### react_flask
 React app using flask to handle communication between user interface and python program.
 
 ![example screenshot](screenshots/react_flask.png)
 #### Requirements
-* **_flask_**
+* **_Flask_**
 * _flask-cors (optional)_
 * _Docker (optional)_
 #### Run
