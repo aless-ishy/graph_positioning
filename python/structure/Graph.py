@@ -1,6 +1,6 @@
 import math
 
-from structure.GraphNode import GraphNode
+from structure.Node import Node
 from structure.Path import Path, SortedPaths
 
 diagonal = math.sqrt(2)
@@ -18,10 +18,10 @@ class Graph:
         self.map = None
 
     def add_dict_node(self, name: str, data, children: []):
-        node = GraphNode(name, data, children)
+        node = Node(name, data, children)
         self.add_node(node)
 
-    def add_node(self, node: GraphNode):
+    def add_node(self, node: Node):
         self.nodes[node.name] = node
 
     def set_parents(self):

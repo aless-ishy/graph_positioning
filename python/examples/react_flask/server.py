@@ -1,17 +1,18 @@
-import os
-import sys
+# # if not building with docker
+# import os
+# import sys
+# # Add structure location to path.
+# # Not needed if structure module is in the same location as this file or any file trying to import structure
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from flask import Flask, render_template, request
-from flask_cors import CORS
-
-# Add structure location to path.
-# Not needed if structure module is in the same location as this file or any file trying to import structure
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from structure.Graph import Graph
 
 app = Flask(__name__)
-CORS(app)
+
+# Allows access to the server with node and react development
+# from flask_cors import CORS
+# CORS(app)
 
 graph = Graph()
 
@@ -20,7 +21,7 @@ graph = Graph()
 def index():
     global graph
     graph = Graph()
-    return "200"
+    return render_template("index.html")
 
 
 @app.route("/api/delete")
@@ -52,11 +53,6 @@ def compile_graph():
                 graph_response.add_dict_node(node_name, None, nodes[node_name])
             return dict(graph_response)
     return {"error": "Not Valid"}
-
-
-@app.route("/api/add_node", methods=["POST"])
-def add_node():
-    return "200"
 
 
 if __name__ == '__main__':

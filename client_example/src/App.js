@@ -13,7 +13,15 @@ class App extends React.Component {
             children: [],
             node_name: "",
             child: "",
-            nodes: {}
+            nodes: {
+                A:["B","C"],
+                B:["D","E"],
+                C:["D","E"],
+                D:["F"],
+                E:["F", "G"],
+                F:["G"],
+                G:[]
+            }
         };
         this.addChild = this.addChild.bind(this);
         this.addNode = this.addNode.bind(this);
@@ -115,9 +123,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        fetch("/api/get_example")
-            .then(response => response.json())
-            .then(response => this.setState({graph: response}));
+        this.compileGraph();
     }
 
     render() {

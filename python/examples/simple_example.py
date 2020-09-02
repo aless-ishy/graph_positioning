@@ -19,4 +19,5 @@ if __name__ == '__main__':
     # Sets implicit attributes, like parents or nodes positions in matrix.
     # Needs to be compiled every time a node is added.
     graph.compile()
-    print(graph.find_path({"i": 0, "j": 0}, {"i": 1, "j": 1}))
+
+    print(graph.find_path({"i": 1, "j": 0}, {"i": 3, "j": 4}))

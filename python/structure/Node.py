@@ -1,4 +1,4 @@
-class GraphNode:
+class Node:
     def __init__(self, node_name: str, data, output_into: [] = None):
         self.children = set(output_into) if output_into is not None else set([])
         self.parents = set([])
