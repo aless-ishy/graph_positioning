@@ -21,7 +21,7 @@ React app using flask to handle communication between user interface and python 
 * _Docker (optional)_
 #### Run
 You can run the server with docker or use flask development server.
-##### 1 Docker
+#### 1 Docker
 * Build image
 ```
 ~/Graph Positioning/python$ docker build --tag graphpositioning:1.0 .
