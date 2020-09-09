@@ -6,5 +6,6 @@ COPY structure ./structure
 COPY install-nginx.sh ./
 RUN bash install-nginx.sh
 RUN pip install --no-cache-dir -r requirements.txt
+EXPOSE 5000
 
 CMD ["uwsgi","--socket","0.0.0.0:5000","--protocol=http","-w","wsgi:app"]
