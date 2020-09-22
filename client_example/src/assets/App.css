@@ -50,6 +50,10 @@
   align-items: center;
 }
 
+.form > *{
+  margin-bottom: 5px !important;
+}
+
 .App-content{
   display: flex;
   align-items: center;

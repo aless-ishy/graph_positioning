@@ -14,13 +14,13 @@ class App extends React.Component {
             node_name: "",
             child: "",
             nodes: {
-                A:["B","C"],
-                B:["D","E"],
-                C:["D","E"],
-                D:["F"],
-                E:["F", "G"],
-                F:["G"],
-                G:[]
+                A: ["B", "C"],
+                B: ["D", "E"],
+                C: ["D", "E"],
+                D: ["F"],
+                E: ["F", "G"],
+                F: ["G"],
+                G: []
             }
         };
         this.addChild = this.addChild.bind(this);
@@ -33,12 +33,13 @@ class App extends React.Component {
         this.clean = this.clean.bind(this);
     }
 
-    clean(){
+    clean() {
         this.setState({
             children: [],
             node_name: "",
             child: "",
-            nodes: {}});
+            nodes: {}
+        });
     }
 
     compileGraph() {
@@ -68,8 +69,13 @@ class App extends React.Component {
 
     addNode() {
         if (this.state.node_name !== "") {
+            const children = this.state.children;
+            const child = this.state.child;
+            if (child !== "" && !children.includes(child)) {
+                children.push(child);
+            }
             const nodes = this.state.nodes;
-            nodes[this.state.node_name] = [...this.state.children];
+            nodes[this.state.node_name] = [...children];
             this.setState({children: [], node_name: "", child: "", nodes});
         }
     }
@@ -132,9 +138,10 @@ class App extends React.Component {
                 <h2>Graph Display</h2>
                 <div className="actions">
                     <div className="form">
-                        <TextField id="node_name" style={{width: 90}} label="Node Name" value={this.state.node_name}
+                        <TextField id="node_name" style={{width: 110}} label="Node Name" value={this.state.node_name}
                                    onChange={e => this.setState({node_name: e.target.value})}/>
-                        <TextField id="child" style={{width: 90}} label="Add Child" value={this.state.child}
+                        <TextField id="child" style={{width: 110}} label="Add Child" value={this.state.child}
+                                   helperText={"Press enter to add"}
                                    onChange={e => this.setState({child: e.target.value})} onKeyPress={this.addChild}/>
                     </div>
                     <div style={{width: 40}}/>
@@ -150,7 +157,8 @@ class App extends React.Component {
                 <div className="action-buttons">
                     <Button variant="contained" color="secondary" onClick={this.addNode}>Add Node</Button>
                     <Button variant="contained" color="secondary" onClick={this.clean}>Clean</Button>
-                    <Button variant="contained" color="secondary" disabled={Object.keys(this.state.nodes).length < 1} onClick={this.compileGraph}>Compile</Button>
+                    <Button variant="contained" color="secondary" disabled={Object.keys(this.state.nodes).length < 1}
+                            onClick={this.compileGraph}>Compile</Button>
                 </div>
                 <div className="node-cards">
                     {this.createNodeCards()}

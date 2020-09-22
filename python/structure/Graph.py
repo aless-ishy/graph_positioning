@@ -7,9 +7,34 @@ diagonal = math.sqrt(2)
 non_diagonal = 1
 
 
+def print_matrix(matrix):
+    s = [[str(e) for e in row] for row in matrix]
+    lens = [max(map(len, col)) for col in zip(*s)]
+    fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
+    table = [fmt.format(*row) for row in s]
+    print('\n'.join(table))
+
+
 def distance_prediction(position, past_distance, target):
     future_distance = math.sqrt((position["i"] - target["i"]) ** 2 - (position["j"] - target["j"]) ** 2)
     return past_distance + future_distance
+
+
+def basic_positions(size: int):
+    positions = [0] * (2 * size + 1)
+    value = 1
+    for i in range(0, size):
+        positions[size - (i + 1)] = value
+        positions[size + i + 1] = -value
+        value += 1
+    return positions
+
+
+def is_possible(list_values: list, position_index: int):
+    return len(list_values) > position_index >= 0 and \
+           (position_index == 0 or isinstance(list_values[position_index - 1], int)) and \
+           isinstance(list_values[position_index], int) and \
+           (position_index + 1 == len(list_values) or isinstance(list_values[position_index + 1], int))
 
 
 class Graph:
@@ -28,6 +53,15 @@ class Graph:
         for node_name in self.nodes:
             for child in self.nodes[node_name].children:
                 self.nodes[child].parents.add(node_name)
+
+    def get_parents_distance(self, node_name):
+        node = self.nodes[node_name]
+        distance = 0
+        for parent_name in node.parents:
+            parent_node = self.nodes[parent_name]
+            distance += math.sqrt((node.position["i"] - parent_node.position["i"]) ** 2 + (
+                    node.position["j"] - parent_node.position["j"]) ** 2)
+        return distance
 
     def create_matrix(self):
         layers = self.find_layer_orientation()
@@ -55,6 +89,54 @@ class Graph:
                     i = i + 2
             matrix.append(row)
             matrix.append([0] * width)
+        return matrix
+
+    def create_matrix_by_distance(self):
+        layers = self.find_layer_orientation()
+        next_position = 1 if len(layers[0]) % 2 == 0 else 1
+        start = next_position
+        end = next_position
+        for node_name in layers[0]:
+            self.nodes[node_name].set_position(1, next_position)
+            if next_position > 0:
+                start = next_position
+                next_position = end - 2
+            else:
+                end = next_position
+                next_position = start + 2
+        if len(layers) > 1:
+            for layer_index in range(1, len(layers)):
+                positions = basic_positions(len(layers[layer_index]) + 2)
+                for node_name in layers[layer_index]:
+                    best_index = -1
+                    best_distance = float("inf")
+                    for position_index in range(0, len(positions)):
+                        if is_possible(positions, position_index):
+                            self.nodes[node_name].set_position(layer_index * 2 + 1, positions[position_index])
+                            parents_distance = self.get_parents_distance(node_name)
+                            if best_distance > parents_distance:
+                                best_index = position_index
+                                best_distance = parents_distance
+                    self.nodes[node_name].set_position(layer_index * 2 + 1, positions[best_index])
+                    positions[best_index] = node_name
+        lowest_index = float("inf")
+        highest_index = -float("inf")
+        for node_name in self.nodes:
+            if self.nodes[node_name].position["j"] < lowest_index:
+                lowest_index = self.nodes[node_name].position["j"]
+            if self.nodes[node_name].position["j"] > highest_index:
+                highest_index = self.nodes[node_name].position["j"]
+        size = highest_index - lowest_index + 3
+        for node_name in self.nodes:
+            position = self.nodes[node_name].position
+            self.nodes[node_name].set_position(position["i"], position["j"] - lowest_index + 1)
+        matrix = [[0] * size]
+        for layer in layers:
+            matrix.append([0] * size)
+            for node_name in layer:
+                position = self.nodes[node_name].position
+                matrix[position["i"]][position["j"]] = node_name
+            matrix.append([0] * size)
         return matrix
 
     def get_movements(self, i, j, exception=None):
@@ -111,7 +193,7 @@ class Graph:
                             higher_cost_path = paths.list[path_index]
                             last_path_position = higher_cost_path.path_list[-1]
                             if movement["i"] == last_path_position["i"] and movement["j"] == last_path_position["j"]:
-                                if higher_cost_path.best_distance > new_path.best_distance:
+                                if float(higher_cost_path) > float(new_path):
                                     paths.pop(path_index)
                                     paths.add(new_path)
                                 break

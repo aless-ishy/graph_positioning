@@ -1,22 +1,46 @@
 import math
+import bisect
 
 
 class Path:
-    def __init__(self, position: dict, target: dict, past_distance: int = 0, path_list: [] = None):
+    def __init__(self, position: dict, target: dict, past_distance: int = 0, path_list: [] = None, changes=0,
+                 vector_orientation=None):
+        self.changes = changes
+        self.vector_orientation = vector_orientation
         if path_list is None:
             self.path_list = [position]
             self.past_distance = 0
         else:
             self.path_list = path_list
             self.past_distance = past_distance + position["distance"]
+            next_orientation = [position["i"] - self.path_list[-1]["i"], position["j"] - self.path_list[-1]["j"]]
             self.path_list.append(position)
+            if self.vector_orientation is not None:
+                if self.vector_orientation != next_orientation:
+                    self.changes += 1
+            self.vector_orientation = next_orientation
         self.target = target
         self.best_distance = self.past_distance + math.sqrt(
             (position["i"] - target["i"]) ** 2 + (position["j"] - target["j"]) ** 2)
 
     def copy_add(self, position):
         path_list = self.path_list.copy()
-        return Path(position, self.target, self.past_distance, path_list)
+        return Path(position, self.target, self.past_distance, path_list, self.changes, self.vector_orientation)
+
+    def __float__(self):
+        return self.best_distance - 1 / (1 + self.changes) + 1
+
+    def __gt__(self, other):
+        return float(self) > float(other)
+
+    def __ge__(self, other):
+        return float(self) >= float(other)
+
+    def __lt__(self, other):
+        return float(self) < float(other)
+
+    def __le__(self, other):
+        return float(self) <= float(other)
 
     def __contains__(self, item):
         for position in self.path_list:
@@ -32,23 +56,5 @@ class SortedPaths:
     def pop(self, index: int):
         return self.list.pop(index)
 
-    def add(self, path: Path, i0: int = 0, i1: int = -1):
-        if i1 == -1:
-            i1 = len(self.list) - 1
-            if i1 == -1:
-                self.list.append(path)
-                return
-        median = int((i1 + i0) * 0.5)
-        if path.best_distance <= self.list[median].best_distance:
-            if median == i0:
-                return self.list.insert(median, path)
-            self.add(path, i0, median)
-        else:
-            if median == i0:
-                if path.best_distance <= self.list[i1].best_distance:
-                    self.list.insert(i1, path)
-                    return
-                else:
-                    self.list.insert(i1 + 1, path)
-                    return
-            self.add(path, median, i1)
+    def add(self, path: Path):
+        bisect.insort(self.list, path)
