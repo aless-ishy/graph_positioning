@@ -7,3 +7,21 @@
   border-left: 0;
   border-right: 0;
 }
+
+.arrow-container{
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: lightgray;
+  height: 30px;
+  width: 30px;
+}
+.arrow {
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 4px;
+  transform: translate(-2px,0) rotate(-45deg);
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import "../assets/Graph.scss";
 import Node from "./Node";
 import Edge from "./Edge";
+import Arrow from "./Arrow";
 
 class Graph extends React.Component {
     constructor(props) {
@@ -48,42 +49,47 @@ class Graph extends React.Component {
 
     drawEdges() {
         const firstLines = {};
-        let edges_components = [];
+        const edges_components = [];
+        const arrow_components = {};
         if (this.props.data && this.props.data.edges) {
             const edges = this.props.data.edges;
-            if(edges)
-            for (let edge_index in edges)
-                if (edges.hasOwnProperty(edge_index) && edges[edge_index]) {
-                    const edge = edges[edge_index].path;
-                    const origin = edges[edge_index].origin;
-                    const opacity = origin === this.state.activeNode ? 1.0 : 0.5;
-                    let last_point;
-                    if (edge)
-                        for (let point_index = 0; point_index < edge.length; point_index++) {
-                            const point = edge[point_index];
-                            if (point_index !== 0) {
-                                const x = last_point.i * 40;
-                                const y = last_point.j * 40;
-                                const rotate = (point.j - last_point.j) * (last_point.i === point.i ? 2 : 1);
-                                const lineProperties = {x, y, rotate, opacity};
-                                const lineKey = `${x}${y}${rotate}`;
-                                if (!firstLines[lineKey])
-                                    firstLines[lineKey] = [];
-                                if (opacity === 1)
-                                    firstLines[lineKey].splice(0, 0, lineProperties)
-                                else
-                                    firstLines[lineKey].push(lineProperties)
+            if (edges)
+                for (let edge_index in edges)
+                    if (edges.hasOwnProperty(edge_index) && edges[edge_index]) {
+                        const edge = edges[edge_index].path;
+                        const origin = edges[edge_index].origin;
+                        const opacity = origin === this.state.activeNode ? 1.0 : 0.5;
+                        let last_point;
+                        if (edge)
+                            for (let point_index = 0; point_index < edge.length; point_index++) {
+                                const point = edge[point_index];
+                                if (point_index !== 0) {
+                                    const x = last_point.i * 40;
+                                    const y = last_point.j * 40;
+                                    const rotate = (point.j - last_point.j) * (last_point.i === point.i ? 2 : 1);
+                                    const lineProperties = {x, y, rotate, opacity};
+                                    const lineKey = `${x}${y}${rotate}`;
+                                    if(point_index === edge.length - 1)
+                                        arrow_components[lineKey] = true;
+                                    if (!firstLines[lineKey])
+                                        firstLines[lineKey] = [];
+                                    if (opacity === 1)
+                                        firstLines[lineKey].splice(0, 0, lineProperties)
+                                    else
+                                        firstLines[lineKey].push(lineProperties)
+                                }
+                                last_point = point;
                             }
-                            last_point = point;
-                        }
-                }
+                    }
         }
         for (let lineKey in firstLines) {
             if (firstLines.hasOwnProperty(lineKey)) {
                 const line = firstLines[lineKey][0];
                 edges_components.push(
                     <Edge key={lineKey}
-                          transform={{x: line.x, y: line.y, rotate: line.rotate}} opacity={line.opacity}/>
+                          transform={{x: line.x, y: line.y, rotate: line.rotate}} opacity={line.opacity}>
+                        {line.opacity >= 1.0 && arrow_components[lineKey] && <Arrow/>}
+                    </Edge>
                 );
             }
         }
