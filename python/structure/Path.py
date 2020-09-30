@@ -20,6 +20,18 @@ class Path:
                     self.changes += 1
             self.vector_orientation = next_orientation
         self.target = target
+        # if len(self.path_list) > 2:
+        #     self.changes = 0
+        #     position = self.path_list[1]
+        #     old_orientation = [position["i"] - self.path_list[0]["i"], position["j"] - self.path_list[0]["j"]]
+        #     old_position = position
+        #     for position_index in range(2,len(self.path_list)):
+        #         position = self.path_list[position_index]
+        #         orientation = [position["i"] - old_position["i"], position["j"] - old_position["j"]]
+        #         if orientation != old_orientation:
+        #             self.changes += 1
+        #         old_orientation = orientation
+        #         old_position = position
         self.best_distance = self.past_distance + math.sqrt(
             (position["i"] - target["i"]) ** 2 + (position["j"] - target["j"]) ** 2)
 

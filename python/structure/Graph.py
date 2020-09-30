@@ -1,4 +1,5 @@
 import math
+from itertools import permutations
 
 from structure.Node import Node
 from structure.Path import Path, SortedPaths
@@ -65,7 +66,7 @@ class Graph:
             child_node = self.nodes[child_name]
             distance += math.sqrt((node.position["i"] - child_node.position["i"]) ** 2 + (
                     node.position["j"] - child_node.position["j"]) ** 2)
-        return distance/(len(node.parents) + len(node.children)) if distance != 0 else float("infinity")
+        return distance/(len(node.parents) + len(node.children)) if distance != 0 else 0
 
     def create_matrix(self):
         layers = self.find_layer_orientation()
@@ -98,24 +99,42 @@ class Graph:
             min_matrix.append(positions)
             matrix.append([0] * width)
 
-        for i in range(5):
+        for i in range(10):
             for layer_index in range(len(layers)):
                 layer = layers[layer_index]
                 nodes = layer.copy()
                 positions = min_matrix[layer_index]
-                for position in positions:
-                    best_distance = float("infinity")
-                    best_node = None
-                    for name in nodes:
-                        self.nodes[name].set_position(position[0],position[1])
-                        distance = self.get_edges_size(name)
-                        if distance < best_distance:
-                            best_distance = distance
-                            best_node = name
-                    if best_node is not None:
-                        self.nodes[best_node].set_position(position[0],position[1])
-                        nodes.remove(best_node)
-                        matrix[position[0]][position[1]] = best_node
+                if len(nodes) < 7:
+                    best_total_distance = float("infinity")
+                    best_combination = nodes
+                    for combination in permutations(nodes,len(nodes)):
+                        distance = 0
+                        for index in range(len(combination)):
+                            node_name = combination[index]
+                            self.nodes[node_name].set_position(positions[index][0],positions[index][1])
+                            distance += self.get_edges_size(node_name)
+                        if distance < best_total_distance:
+                            best_total_distance = distance
+                            best_combination = combination
+                    for index in range(len(best_combination)):
+                        position = positions[index]
+                        node_name = best_combination[index]
+                        self.nodes[node_name].set_position(position[0],position[1])
+                        matrix[position[0]][position[1]] = node_name
+                else:
+                    for position in positions:
+                        best_distance = float("infinity")
+                        best_node = None
+                        for name in nodes:
+                            self.nodes[name].set_position(position[0],position[1])
+                            distance = self.get_edges_size(name)
+                            if distance < best_distance:
+                                best_distance = distance
+                                best_node = name
+                        if best_node is not None:
+                            self.nodes[best_node].set_position(position[0],position[1])
+                            nodes.remove(best_node)
+                            matrix[position[0]][position[1]] = best_node
         return matrix
 
     def create_matrix_by_distance(self):
@@ -209,21 +228,12 @@ class Graph:
                 if movement not in path:
                     new_path = path.copy_add(movement)
                     paths_number = len(paths.list)
-                    if paths_number == 0 and not trace[movement["i"]][movement["j"]]:
-                        paths.add(new_path)
-                        trace[movement["i"]][movement["j"]] = True
-                    elif not trace[movement["i"]][movement["j"]]:
+                    if paths_number == 0:
                         paths.add(new_path)
                         trace[movement["i"]][movement["j"]] = True
                     else:
-                        for path_index in range(paths_number):
-                            higher_cost_path = paths.list[path_index]
-                            last_path_position = higher_cost_path.path_list[-1]
-                            if movement["i"] == last_path_position["i"] and movement["j"] == last_path_position["j"]:
-                                if float(higher_cost_path) > float(new_path):
-                                    paths.pop(path_index)
-                                    paths.add(new_path)
-                                break
+                        paths.add(new_path)
+                        trace[movement["i"]][movement["j"]] = True
 
     def get_edges_paths(self):
         if self.map is None:
