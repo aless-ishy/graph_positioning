@@ -54,14 +54,18 @@ class Graph:
             for child in self.nodes[node_name].children:
                 self.nodes[child].parents.add(node_name)
 
-    def get_parents_distance(self, node_name):
+    def get_edges_size(self, node_name):
         node = self.nodes[node_name]
         distance = 0
         for parent_name in node.parents:
             parent_node = self.nodes[parent_name]
             distance += math.sqrt((node.position["i"] - parent_node.position["i"]) ** 2 + (
                     node.position["j"] - parent_node.position["j"]) ** 2)
-        return distance
+        for child_name in node.children:
+            child_node = self.nodes[child_name]
+            distance += math.sqrt((node.position["i"] - child_node.position["i"]) ** 2 + (
+                    node.position["j"] - child_node.position["j"]) ** 2)
+        return distance/(len(node.parents) + len(node.children))
 
     def create_matrix(self):
         layers = self.find_layer_orientation()
@@ -74,6 +78,7 @@ class Graph:
         width = largest_layer_size * 2 + 1
         median = int(width * 0.5)
         matrix = [[0] * width]
+        min_matrix = []
         for layer_index in range(len(layers)):
             layer = layers[layer_index]
             row = [0] * width
@@ -81,14 +86,35 @@ class Graph:
             if layer_size % 2 == 0:
                 layer_size = layer_size + 1
             i = median - (layer_size - 1)
+            positions = []
             for node_name in layer:
                 row[i] = node_name
                 self.nodes[node_name].set_position(layer_index * 2 + 1, i)
+                positions.append((layer_index * 2 + 1, i))
                 i = i + 2
                 if i == median and len(layer) % 2 == 0:
                     i = i + 2
             matrix.append(row)
+            min_matrix.append(positions)
             matrix.append([0] * width)
+
+        for i in range(5):
+            for layer_index in range(len(layers)):
+                layer = layers[layer_index]
+                nodes = layer.copy()
+                positions = min_matrix[layer_index]
+                for position in positions:
+                    best_distance = float("infinity")
+                    best_node = None
+                    for name in nodes:
+                        self.nodes[name].set_position(position[0],position[1])
+                        distance = self.get_edges_size(name)
+                        if distance < best_distance:
+                            best_distance = distance
+                            best_node = name
+                    self.nodes[best_node].set_position(position[0],position[1])
+                    nodes.remove(best_node)
+                    matrix[position[0]][position[1]] = best_node
         return matrix
 
     def create_matrix_by_distance(self):
@@ -113,7 +139,7 @@ class Graph:
                     for position_index in range(0, len(positions)):
                         if is_possible(positions, position_index):
                             self.nodes[node_name].set_position(layer_index * 2 + 1, positions[position_index])
-                            parents_distance = self.get_parents_distance(node_name)
+                            parents_distance = self.get_edges_size(node_name)
                             if best_distance > parents_distance:
                                 best_index = position_index
                                 best_distance = parents_distance
