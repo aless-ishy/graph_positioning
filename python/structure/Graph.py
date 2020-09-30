@@ -65,7 +65,7 @@ class Graph:
             child_node = self.nodes[child_name]
             distance += math.sqrt((node.position["i"] - child_node.position["i"]) ** 2 + (
                     node.position["j"] - child_node.position["j"]) ** 2)
-        return distance/(len(node.parents) + len(node.children))
+        return distance/(len(node.parents) + len(node.children)) if distance != 0 else float("infinity")
 
     def create_matrix(self):
         layers = self.find_layer_orientation()
@@ -112,9 +112,10 @@ class Graph:
                         if distance < best_distance:
                             best_distance = distance
                             best_node = name
-                    self.nodes[best_node].set_position(position[0],position[1])
-                    nodes.remove(best_node)
-                    matrix[position[0]][position[1]] = best_node
+                    if best_node is not None:
+                        self.nodes[best_node].set_position(position[0],position[1])
+                        nodes.remove(best_node)
+                        matrix[position[0]][position[1]] = best_node
         return matrix
 
     def create_matrix_by_distance(self):
