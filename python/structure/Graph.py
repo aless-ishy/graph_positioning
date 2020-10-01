@@ -66,7 +66,7 @@ class Graph:
             child_node = self.nodes[child_name]
             distance += math.sqrt((node.position["i"] - child_node.position["i"]) ** 2 + (
                     node.position["j"] - child_node.position["j"]) ** 2)
-        return distance/(len(node.parents) + len(node.children)) if distance != 0 else 0
+        return distance / (len(node.parents) + len(node.children)) if distance != 0 else 0
 
     def create_matrix(self):
         layers = self.find_layer_orientation()
@@ -104,14 +104,14 @@ class Graph:
                 layer = layers[layer_index]
                 nodes = layer.copy()
                 positions = min_matrix[layer_index]
-                if len(nodes) < 7:
+                if len(nodes) < 6:
                     best_total_distance = float("infinity")
                     best_combination = nodes
-                    for combination in permutations(nodes,len(nodes)):
+                    for combination in permutations(nodes, len(nodes)):
                         distance = 0
                         for index in range(len(combination)):
                             node_name = combination[index]
-                            self.nodes[node_name].set_position(positions[index][0],positions[index][1])
+                            self.nodes[node_name].set_position(positions[index][0], positions[index][1])
                             distance += self.get_edges_size(node_name)
                         if distance < best_total_distance:
                             best_total_distance = distance
@@ -119,22 +119,27 @@ class Graph:
                     for index in range(len(best_combination)):
                         position = positions[index]
                         node_name = best_combination[index]
-                        self.nodes[node_name].set_position(position[0],position[1])
+                        self.nodes[node_name].set_position(position[0], position[1])
                         matrix[position[0]][position[1]] = node_name
                 else:
-                    for position in positions:
-                        best_distance = float("infinity")
-                        best_node = None
-                        for name in nodes:
-                            self.nodes[name].set_position(position[0],position[1])
-                            distance = self.get_edges_size(name)
-                            if distance < best_distance:
-                                best_distance = distance
-                                best_node = name
-                        if best_node is not None:
-                            self.nodes[best_node].set_position(position[0],position[1])
-                            nodes.remove(best_node)
-                            matrix[position[0]][position[1]] = best_node
+                    total_length = 0
+                    for name in nodes: total_length += self.get_edges_size(name)
+                    for name in nodes:
+                        for next_node in nodes:
+                            if next_node != name:
+                                position = self.nodes[name].get_position()
+                                next_position = self.nodes[next_node].get_position()
+                                new_length = total_length - self.get_edges_size(name) - self.get_edges_size(next_node)
+                                self.nodes[next_node].set_position(position[0], position[1])
+                                self.nodes[name].set_position(next_position[0], next_position[1])
+                                new_length += self.get_edges_size(name) + self.get_edges_size(next_node)
+                                if new_length > total_length:
+                                    self.nodes[name].set_position(position[0], position[1])
+                                    self.nodes[next_node].set_position(next_position[0], next_position[1])
+                                else:
+                                    total_length = new_length
+                                    matrix[next_position[0]][next_position[1]] = name
+                                    matrix[position[0]][position[1]] = next_node
         return matrix
 
     def create_matrix_by_distance(self):

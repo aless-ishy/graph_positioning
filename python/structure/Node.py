@@ -9,6 +9,9 @@ class Node:
     def set_position(self, i: int, j: int):
         self.position = {"i": i, "j": j}
 
+    def get_position(self):
+        return self.position["i"], self.position["j"]
+
     def __iter__(self):
         yield "name", self.name
         yield "children", list(self.children)
