@@ -1,7 +1,7 @@
 # Graph Positioning
-Define nodes and edges positions of a cycle-less or undirected graph.
+A Demonstration and Python library to compute optimal positions for nodes and edges in cycle-free or undirected graphs.
 ## Motivation
-The main problem when drawing graphs is to position edges without trespassing nodes. To solve this problem and achieve an optimal solution was utilized A* algorithm and a JSON friendly api to allow easy drawing in front-end programs. 
+When drawing graphs, one of the biggest challenges is positioning edges without overlapping nodes. This project addresses that problem by using the A algorithm* to calculate optimal placements. It also provides a JSON-friendly API, making it easy to integrate with front-end visualization tools.
 ## Requirements
 The main project, _"structure"_ folder, has no requirement besides python 3.
 ## Examples  
